@@ -4,9 +4,7 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 
-# Preparamos el esquema de postgresql explícitamente
-RUN mkdir -p prisma && cp ./src/database/prisma/postgresql-schema.prisma ./prisma/schema.prisma
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN npx prisma generate --schema=./src/database/prisma/postgresql-schema.prisma
 RUN npm run build
 
 FROM node:20-alpine
@@ -19,5 +17,4 @@ COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 8080
 
-# Forzamos a que el script use el provider postgresql y arranque directo sin romper migraciones locales
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=./prisma/schema.prisma && npm run start:prod"]
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=./src/database/prisma/postgresql-schema.prisma && npm run start:prod"]
